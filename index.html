@@ -5,16 +5,41 @@
 	<title>GitAnimation</title>
 	<link href="//maxcdn.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
 	<link rel="stylesheet" href="static/main.css">
+	<link rel="stylesheet" href="static/jquery.terminal.css">
 </head>
 <body>
 	<div class="container">
 		<div class="row">
-			<div class="span4" id="remote"></div>
-			<div class="span4" id="local"></div>
-			<div class="span4" id="localFile"></div>
+			<div class="span4" >
+				<div id="remote"></div>
+			</div>
+			<div class="span4">
+				<div id="local"></div>
+			</div>
+			<div class="span4">
+				<div id="localFile">
+					<div class="form-search text-center" id="addfile">
+					  <input type="text" class="input-medium">
+					  <button type="submit" class="btn">Add File</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="container" id="conmandLineContainer">
+		<div class="row-fluid">
+			<div class="span10 offset1">
+				<div id="conmandLine"></div>
+			</div>
 		</div>
 	</div>
 	
 </body>
 	 <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js" charset="utf-8"></script>
+	 <script src="static/jquery.js"></script>
+	 <script src="static/jquery.mousewheel.js"></script>
+	 <script src="static/jquery.terminal.js"></script>
+	 <script src="GitAnimation.js" ></script>
+	 <script src="runScript.js" ></script>
 </html>

@@ -1,8 +1,10 @@
 #remote{
   position:relative;
-  margin:10px;
+  margin:10px 0px;
   background-color: #fff;
   border: 2px solid #ddd;
+  height:550px;
+
 }
 
 #remote:after{
@@ -20,9 +22,10 @@
 
 #local{
   position:relative;
-  margin:10px;
+  margin:10px 0px;
   background-color: #fff;
   border: 2px solid #ddd;
+  height:550px;
 }
 
 #local:after{
@@ -40,9 +43,10 @@
 
 #localFile{
   position:relative;
-  margin:10px;
+  margin:10px 0px;
   background-color: #fff;
   border: 2px solid #ddd;
+  height:550px;
 }
 
 #localFile:after{
@@ -56,4 +60,34 @@
   background-color: #f5f5f5;
   border: 1px solid #ddd;
   color:#9da0a4;
+}
+
+#filecontainer{
+    margin:5px;
+    margin-top:20px;
+}
+
+.single_file{
+    border-radius: 3px;
+    width:40%;
+    padding:3px;
+    margin:3px 13px;
+    border: 1px solid #ddd;
+    color:#9da0a4;
+    font-weight: bold;
+    text-align: center;
+}
+
+#conmandLine{
+  background-color: #000;
+  border-radius: 4px;
+  height:90px;
+}
+
+#addfile{
+  margin-top:40px;
+}
+
+#conmandLineContainer{
+    margin:5px;
 }
