@@ -1,0 +1,59 @@
+#remote{
+  position:relative;
+  margin:10px;
+  background-color: #fff;
+  border: 2px solid #ddd;
+}
+
+#remote:after{
+  content:"Remote Repository";
+  position: absolute;
+  top:1px;
+  left:-1px;
+  padding:3px 7px;
+  font-size: 12px;
+  font-weight: bold;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  color:#9da0a4;
+}
+
+#local{
+  position:relative;
+  margin:10px;
+  background-color: #fff;
+  border: 2px solid #ddd;
+}
+
+#local:after{
+  content:"Local Repository";
+  position: absolute;
+  top:1px;
+  left:-1px;
+  padding:3px 7px;
+  font-size: 12px;
+  font-weight: bold;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  color:#9da0a4;
+}
+
+#localFile{
+  position:relative;
+  margin:10px;
+  background-color: #fff;
+  border: 2px solid #ddd;
+}
+
+#localFile:after{
+  content:"Local File System";
+  position: absolute;
+  top:1px;
+  left:-1px;
+  padding:3px 7px;
+  font-size: 12px;
+  font-weight: bold;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  color:#9da0a4;
+}
