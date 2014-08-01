@@ -73,9 +73,12 @@
     padding:3px;
     margin:3px 13px;
     border: 1px solid #ddd;
-    color:#9da0a4;
     font-weight: bold;
     text-align: center;
+}
+
+.unadd{
+  color:#9da0a4;
 }
 
 #conmandLine{
@@ -90,4 +93,9 @@
 
 #conmandLineContainer{
     margin:5px;
+}
+
+#alertBox{
+    margin:5px auto;
+    width:60%;
 }
