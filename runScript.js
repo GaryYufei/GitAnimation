@@ -1,9 +1,16 @@
 ;(function() {
 	GitAnimation.set_local_file('#localFile');
 	GitAnimation.add_single_file('textbook.txt');
+	GitAnimation.set_local_repository('#local');
 
 	$('#conmandLine').terminal(function(cmd, trm){
-		trm.echo('hello world');
+		var words = cmd.split(' ');
+		if(words[0] == 'move'){
+			GitAnimation.add_point_dymanic('kyg23',"#ab238");
+			trm.echo('successful!');
+		}else{
+			trm.echo('hello world');
+		}
 	},{
 		greetings:'Git code'
 	}); 
