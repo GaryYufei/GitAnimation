@@ -5,6 +5,11 @@ var GitAnimation = ( function() {
 	var LocalfileList = []
 	var filenum = 0;
 
+	var NodeNumInEachLevel = [];
+	var LevelNum = 0;
+
+	var tip;
+
 	function init_local_file(){
 		local_file_box = LocalFile
 						.append('div')
@@ -41,32 +46,169 @@ var GitAnimation = ( function() {
 		return {'result':true,'name':name,'filename':filename};
 	}
 
-	function create_commit_node(id,cx,cy,root,color){
+	function get_position(id,root,rid){
+
+		var ids = [];
+		var new_cxs = [];
+		var num = 0;
+
+		if(root != null){
+			var elements = d3.selectAll('.' + rid);
+			var start = parseInt(root.attr('start'));
+			var end = parseInt(root.attr('end'));
+			var LenthForEachNode = (end - start) / (elements.size() + 1);
+			elements.each(function(i,d){
+				var node = d3.select(this);
+				var index = parseInt(node.attr('index'));
+				node.attr('start',start + LenthForEachNode * (index - 1));
+				node.attr('end',start + LenthForEachNode * index);
+
+				ids[num] = node.attr('id');
+				new_cxs[num] = start + LenthForEachNode * (index - 0.5)
+				num ++;
+			});
+
+			return {
+						'cx':start + LenthForEachNode * (elements.size() + 0.5),
+						'cy':parseInt(root.attr('cy')) + 50,
+						'start':start + LenthForEachNode * elements.size() ,
+						'end':start + LenthForEachNode * (elements.size() + 1),
+						'ids':ids,
+						'new_cxs':new_cxs
+			};
+		}
+
+		return {
+			'cx':183,
+			'cy':5,
+			'start':0,
+			'end':366,
+			'ids':[],
+			'new_cxs':[]
+		};
+		
+	}
+
+	function create_commit_node(id,root,color){
 		 
+		 var _root,curLevel,result;
 		 function add_line_between_line(){
-		 	if(root != null){
-				var _root = d3.select(root);
-				local_repository_box.append('line')
-									.attr('x1',_root.attr('cx'))
-									.attr('y1',_root.attr('cy'))
-									.attr('x2',cx)
-									.attr('y2',cy)
-									.attr('stroke-width','2')
-									.attr('stroke','black')
-									.attr('id','line'+id);
-			}
+		 		if(_root != null){
+					local_repository_box.append('line')
+										.attr('x1',_root.attr('cx'))
+										.attr('y1',_root.attr('cy'))
+										.attr('x2',result['cx'])
+										.attr('y2',result['cy'])
+										.attr('stroke-width','2')
+										.attr('stroke','black')
+										.attr('id','line'+id);
+				}
 		 }
 
-		 local_repository_box.append('circle')
-		 					.attr('cx',cx)
-		 					.attr('cy',cy)
-		 					.attr('fill',color)
-		 					.attr('r','1')
-		 					.attr('id',id)
-		 					.transition()
-		 					.duration(1000)
-		 					.attr('r','6')
-		 					.each('end',add_line_between_line);
+		function create_new_point(){
+			var point = local_repository_box
+									.append('circle')
+									.attr('cx',result['cx']).attr('cy',result['cy'])
+									.attr('fill',color).attr('r','1')
+									.attr('id',id)
+									.attr('level',curLevel)
+									.attr('class',root)
+									.attr('index',NodeNumInEachLevel[curLevel])
+									.attr('start',result['start']).attr('end',result['end'])
+									.on('mouseover',function(el){
+										tip.show(id);
+									})
+									.on('mouseout',function(el){
+										tip.hide();
+									});
+			point.transition()
+				.duration(1000)
+				.attr('r','6')
+				.each('end',add_line_between_line);
+		}
+
+		function move_children(parent_id,p_new_cs){
+			var parent = d3.select('#'+parent_id);
+			var children = d3.selectAll('.'+parent_id);
+			var start = parseInt(parent.attr('start'));
+			var end = parseInt(parent.attr('end'));
+			var LenthForEachNode = (end - start) / children.size();
+
+			children.each(function(i,d){
+				var child = d3.select(this);
+				var index = parseInt(child.attr('index'));
+				child.attr('start',start + LenthForEachNode * (index - 1));
+				child.attr('end',start + LenthForEachNode * index);
+				child.transition()
+					 .duration(1000)
+					 .attr('cx',start + LenthForEachNode * (index - 0.5));
+				var line = d3.select('#line' + child.attr('id'));
+				line.transition()
+					.duration(1000)
+					.attr('x1',p_new_cs)
+					.attr('x2',start + LenthForEachNode * (index - 0.5));
+
+				move_children(child.attr('id'));
+			});
+
+		}
+
+		function move_same_level_points(ids,new_cxs){
+			var i = 0;
+
+			function move_point(){
+		
+				if( i < ids.length){
+					var id = ids[i];
+					var new_cx = new_cxs[i];
+					var point = d3.select('#' + id);
+					point.transition()
+						 .duration(1000)
+						 .attr('cx',new_cx);
+					var line = d3.select('#line'+id);
+					if(i < ids.length - 1){
+						line.transition()
+			 				.duration(1000)
+		 	 				.attr('x2',new_cx)
+		 	 				.each('end',move_point);
+					}else{
+						line.transition()
+			 				.duration(1000)
+		 	 				.attr('x2',new_cx)
+		 	 				.each('end',create_new_point);
+					}
+					i++;
+					move_children(id,new_cx);
+				}
+			}
+
+			if(ids.length == 0){
+				create_new_point();
+			}else{
+				move_point();
+			}
+
+			
+		}
+
+		if(root != null){
+			_root = d3.select('#' + root);
+			curLevel = parseInt(_root.attr('level')) + 1;
+			if(curLevel > LevelNum){
+				LevelNum = curLevel;
+				NodeNumInEachLevel[LevelNum] = 1;
+			}else{
+				NodeNumInEachLevel[curLevel] ++;
+			}
+		}else{
+			NodeNumInEachLevel[0] = 1;
+			_root = null;
+			curLevel = 0;
+		}
+
+		result = get_position(id,_root,root);
+
+		move_same_level_points(result['ids'],result['new_cxs']);
 		
 	}
 
@@ -76,35 +218,15 @@ var GitAnimation = ( function() {
 						.attr('height','100%');
 		local_repository_box = svg.append('g')
 								.attr('transform','translate(0,50)');
-	}
+		tip = d3.tip()
+                .attr('class', 'd3-tip')
+                .html(function(d){ 
+                    return '<span>' + d + '</span>' 
+                })
+                .direction('n')
+                .offset([-10, 0]);
 
-	
-
-	function move_same_level_points(ids,new_cxs,parent){
-		var i = 0;
-		function move_point(){
-	
-			if( i < ids.length - 1){
-				var id = ids[i];
-				var new_cx = new_cxs[i];
-				i++;
-				var point = d3.select('#' + id);
-				point.transition()
-					 .duration(1000)
-					 .attr('cx',new_cx);
-
-				d3.select('#line'+id).transition()
-					 				.duration(1000)
-				 	 				.attr('x2',new_cx)
-				 	 				.each('end',move_point);
-			}else{
-				var y = parseInt(d3.select(parent).attr('cy'));
-				create_commit_node(ids[i],new_cxs[i],y+50,parent,'red');
-			}
-		}
-
-		move_point();
-
+        local_repository_box.call(tip);
 
 	}
 
@@ -117,9 +239,9 @@ var GitAnimation = ( function() {
 		set_local_repository:function(local_repository){
 			local = d3.select(local_repository);
 			init_local_repository();
-			create_commit_node("ab238",183,5,null,'blue');
-			create_commit_node("df211",122,55,"#ab238",'red');
-			create_commit_node("gh980",244,55,"#ab238",'blue');
+			create_commit_node("ab238",null,'blue');
+			//create_commit_node("df211","ab238",'red');
+			//create_commit_node("gh980","ab238",'blue');
 		},
 
 		set_remote_repository:function(remote_repository){
@@ -141,11 +263,7 @@ var GitAnimation = ( function() {
 		},
 
 		add_point_dymanic:function(id,parent){
-			var current_level_node_num = 4;
-			var delta = 366 / current_level_node_num;
-			var ids = ['df211','gh980',id];
-			var new_cxs = [delta,delta*2,delta*3];
-			move_same_level_points(ids,new_cxs,parent);
+			create_commit_node(id,parent,'red');
 
 		}
 

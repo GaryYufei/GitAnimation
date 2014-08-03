@@ -6,7 +6,7 @@
 	$('#conmandLine').terminal(function(cmd, trm){
 		var words = cmd.split(' ');
 		if(words[0] == 'move'){
-			GitAnimation.add_point_dymanic('kyg23',"#ab238");
+			GitAnimation.add_point_dymanic(words[1],words[2]);
 			trm.echo('successful!');
 		}else{
 			trm.echo('hello world');
