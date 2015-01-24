@@ -8,6 +8,9 @@
 		if(words[0] == 'move'){
 			GitAnimation.add_point_dymanic(words[1],words[2]);
 			trm.echo('successful!');
+		}else if(words[0] == 'merge') {
+			GitAnimation.merge_branch(words[1],words[2]);
+			trm.echo('successful!');
 		}else{
 			trm.echo('hello world');
 		}

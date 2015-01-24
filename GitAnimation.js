@@ -69,12 +69,12 @@ var GitAnimation = ( function() {
 			});
 
 			return {
-						'cx':start + LenthForEachNode * (elements.size() + 0.5),
-						'cy':parseInt(root.attr('cy')) + 50,
-						'start':start + LenthForEachNode * elements.size() ,
-						'end':start + LenthForEachNode * (elements.size() + 1),
-						'ids':ids,
-						'new_cxs':new_cxs
+					'cx':start + LenthForEachNode * (elements.size() + 0.5),
+					'cy':parseInt(root.attr('cy')) + 50,
+					'start':start + LenthForEachNode * elements.size() ,
+					'end':start + LenthForEachNode * (elements.size() + 1),
+					'ids':ids,
+					'new_cxs':new_cxs
 			};
 		}
 
@@ -89,7 +89,7 @@ var GitAnimation = ( function() {
 		
 	}
 
-	function create_commit_node(id,root,color){
+	function create_commit_node(id,root,color,callback){
 		 
 		 var _root,curLevel,result;
 		 function add_line_between_line(){
@@ -103,6 +103,7 @@ var GitAnimation = ( function() {
 										.attr('stroke','black')
 										.attr('id','line'+id);
 				}
+				callback();
 		 }
 
 		function create_new_point(){
@@ -143,12 +144,13 @@ var GitAnimation = ( function() {
 					 .duration(1000)
 					 .attr('cx',start + LenthForEachNode * (index - 0.5));
 				var line = d3.select('#line' + child.attr('id'));
+				var ch_new_cs = start + LenthForEachNode * (index - 0.5); 
 				line.transition()
 					.duration(1000)
 					.attr('x1',p_new_cs)
-					.attr('x2',start + LenthForEachNode * (index - 0.5));
+					.attr('x2',ch_new_cs);
 
-				move_children(child.attr('id'));
+				move_children(child.attr('id'),ch_new_cs);
 			});
 
 		}
@@ -212,6 +214,28 @@ var GitAnimation = ( function() {
 		
 	}
 
+	function merge(aid,bid) {
+
+		function add_line_between_points(){
+			
+			var anode = d3.select("#" + bid);
+			var mergeNode = d3.select("#" + mergeNodeID);
+
+			local_repository_box.append('line')
+					.attr('x1',anode.attr('cx'))
+					.attr('y1',anode.attr('cy'))
+					.attr('x2',mergeNode.attr('cx'))
+					.attr('y2',mergeNode.attr('cy'))
+					.attr('stroke-width','2')
+					.attr('stroke','black')
+					.attr('id','line'+bid);
+		}
+
+		var mergeNodeID = aid + "merge" + bid;
+
+		create_commit_node(mergeNodeID, aid, 'blue',add_line_between_points);
+	}
+
 	function init_local_repository(){
 		var svg = local.append('svg')
 						.attr('width','100%')
@@ -239,7 +263,7 @@ var GitAnimation = ( function() {
 		set_local_repository:function(local_repository){
 			local = d3.select(local_repository);
 			init_local_repository();
-			create_commit_node("ab238",null,'blue');
+			create_commit_node("ab238",null,'blue',function(){});
 			//create_commit_node("df211","ab238",'red');
 			//create_commit_node("gh980","ab238",'blue');
 		},
@@ -263,8 +287,12 @@ var GitAnimation = ( function() {
 		},
 
 		add_point_dymanic:function(id,parent){
-			create_commit_node(id,parent,'red');
+			create_commit_node(id,parent,'red',function(){});
 
+		},
+
+		merge_branch: function(aid,bid) {
+			merge(aid,bid);
 		}
 
 };
