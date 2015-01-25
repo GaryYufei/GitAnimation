@@ -11,7 +11,11 @@
 		}else if(words[0] == 'merge') {
 			GitAnimation.merge_branch(words[1],words[2]);
 			trm.echo('successful!');
-		}else{
+		}else if(words[0] == 'delete') {
+			GitAnimation.delete_node(words[1]);
+			trm.echo('successful!');
+		}
+		else{
 			trm.echo('hello world');
 		}
 	},{

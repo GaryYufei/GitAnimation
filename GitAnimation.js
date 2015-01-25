@@ -57,19 +57,19 @@ var GitAnimation = ( function() {
 			var start = parseInt(root.attr('start'));
 			var end = parseInt(root.attr('end'));
 			var LenthForEachNode = (end - start) / (elements.size() + 1);
-			elements.each(function(i,d){
+			elements.each(function(d,i){
 				var node = d3.select(this);
-				var index = parseInt(node.attr('index'));
-				node.attr('start',start + LenthForEachNode * (index - 1));
-				node.attr('end',start + LenthForEachNode * index);
+				var index = parseInt(i);
+				node.attr('start',start + LenthForEachNode * index);
+				node.attr('end',start + LenthForEachNode * (index + 1));
 
 				ids[num] = node.attr('id');
-				new_cxs[num] = start + LenthForEachNode * (index - 0.5)
+				new_cxs[num] = start + LenthForEachNode * index
 				num ++;
 			});
 
 			return {
-					'cx':start + LenthForEachNode * (elements.size() + 0.5),
+					'cx':start + LenthForEachNode * elements.size(),
 					'cy':parseInt(root.attr('cy')) + 50,
 					'start':start + LenthForEachNode * elements.size() ,
 					'end':start + LenthForEachNode * (elements.size() + 1),
@@ -79,9 +79,9 @@ var GitAnimation = ( function() {
 		}
 
 		return {
-			'cx':183,
+			'cx':15,
 			'cy':5,
-			'start':0,
+			'start':15,
 			'end':366,
 			'ids':[],
 			'new_cxs':[]
@@ -89,7 +89,7 @@ var GitAnimation = ( function() {
 		
 	}
 
-	function create_commit_node(id,root,color,callback){
+	function create_commit_node(id,root,color){
 		 
 		 var _root,curLevel,result;
 		 function add_line_between_line(){
@@ -103,18 +103,16 @@ var GitAnimation = ( function() {
 										.attr('stroke','black')
 										.attr('id','line'+id);
 				}
-				callback();
 		 }
 
 		function create_new_point(){
 			var point = local_repository_box
 									.append('circle')
-									.attr('cx',result['cx']).attr('cy',result['cy'])
+									.attr('cx',result['cx'])
+									.attr('cy',result['cy'])
 									.attr('fill',color).attr('r','1')
 									.attr('id',id)
-									.attr('level',curLevel)
 									.attr('class',root)
-									.attr('index',NodeNumInEachLevel[curLevel])
 									.attr('start',result['start']).attr('end',result['end'])
 									.on('mouseover',function(el){
 										tip.show(id);
@@ -135,16 +133,16 @@ var GitAnimation = ( function() {
 			var end = parseInt(parent.attr('end'));
 			var LenthForEachNode = (end - start) / children.size();
 
-			children.each(function(i,d){
+			children.each(function(d,i){
 				var child = d3.select(this);
-				var index = parseInt(child.attr('index'));
-				child.attr('start',start + LenthForEachNode * (index - 1));
-				child.attr('end',start + LenthForEachNode * index);
+				var index = parseInt(i);
+				var ch_new_cs = start + LenthForEachNode * index; 
+				var line = d3.select('#line' + child.attr('id'));
+				child.attr('start',ch_new_cs);
+				child.attr('end',ch_new_cs + LenthForEachNode);
 				child.transition()
 					 .duration(1000)
-					 .attr('cx',start + LenthForEachNode * (index - 0.5));
-				var line = d3.select('#line' + child.attr('id'));
-				var ch_new_cs = start + LenthForEachNode * (index - 0.5); 
+					 .attr('cx',ch_new_cs);
 				line.transition()
 					.duration(1000)
 					.attr('x1',p_new_cs)
@@ -217,9 +215,14 @@ var GitAnimation = ( function() {
 	function merge(aid,bid) {
 
 		function add_line_between_points(){
-			
-			var anode = d3.select("#" + bid);
-			var mergeNode = d3.select("#" + mergeNodeID);
+			local_repository_box.append('line')
+					.attr('x1',bnode.attr('cx'))
+					.attr('y1',bnode.attr('cy'))
+					.attr('x2',mergeNode.attr('cx'))
+					.attr('y2',mergeNode.attr('cy'))
+					.attr('stroke-width','2')
+					.attr('stroke','black')
+					.attr('id','line'+bid);
 
 			local_repository_box.append('line')
 					.attr('x1',anode.attr('cx'))
@@ -231,9 +234,39 @@ var GitAnimation = ( function() {
 					.attr('id','line'+bid);
 		}
 
+		var anode = d3.select("#" + aid);
+		var bnode = d3.select("#" + bid);
+		var ay = parseInt(anode.attr('cy'));
+		var by = parseInt(bnode.attr('cy'));
+		var distance = ay + 50;
+		if(ay < by) {
+			distance = by + 50;
+		}
 		var mergeNodeID = aid + "merge" + bid;
+		var mergeNode = local_repository_box
+							.append('circle')
+							.attr('cx',parseInt(anode.attr('cx')))
+							.attr('cy',distance)
+							.attr('fill',anode.attr('fill')).attr('r','1')
+							.attr('id',mergeNodeID)
+							.attr('class',aid + " " + bid)
+							.attr('start',parseInt(anode.attr('start')))
+							.attr('end',parseInt(anode.attr('end')))
+							.on('mouseover',function(el){
+								tip.show(mergeNodeID);
+							})
+							.on('mouseout',function(el){
+								tip.hide();
+							});
+		mergeNode.transition()
+			.duration(1000)
+			.attr('r','6')
+			.each('end',add_line_between_points);
+	}
 
-		create_commit_node(mergeNodeID, aid, 'blue',add_line_between_points);
+	function delete_single_node(id) {
+		var node = d3.select("#" + id);
+		node.attr('fill','grey');
 	}
 
 	function init_local_repository(){
@@ -263,9 +296,11 @@ var GitAnimation = ( function() {
 		set_local_repository:function(local_repository){
 			local = d3.select(local_repository);
 			init_local_repository();
-			create_commit_node("ab238",null,'blue',function(){});
-			//create_commit_node("df211","ab238",'red');
-			//create_commit_node("gh980","ab238",'blue');
+			create_commit_node("ab238",null,'blue');
+			//create_commit_node("f1","ab238",'blue');
+			//create_commit_node("f2","ab238",'blue');
+			//create_commit_node("f3","f2",'blue');
+			//create_commit_node("f4","f3",'blue');
 		},
 
 		set_remote_repository:function(remote_repository){
@@ -287,13 +322,17 @@ var GitAnimation = ( function() {
 		},
 
 		add_point_dymanic:function(id,parent){
-			create_commit_node(id,parent,'red',function(){});
+			create_commit_node(id,parent,'red');
 
 		},
 
 		merge_branch: function(aid,bid) {
 			merge(aid,bid);
+		},
+
+		delete_node: function(id) {
+			delete_single_node(id);
 		}
 
-};
+	};
 } () );
